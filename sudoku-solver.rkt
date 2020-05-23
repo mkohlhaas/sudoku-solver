@@ -157,7 +157,7 @@
     ( 57 58 59 66 67 68 75 76 77 )
     ( 60 61 62 69 70 71 78 79 80 )))
 
-; listof(listof(pos))
+; listof(blocks) = listof(listof(pos))
 (define blocks
   (append rows cols squares))
 
@@ -188,11 +188,36 @@
 
 ; board -> pos
 ; board = listof(pos)
-; TODO: here you can insert any kind of heuristics, eg. hole with the most
-; hints; new hole that is furthest away from previous hole, etc.
 (define (find-next-hole b)
-  (- (length b)
-     (length (member 0 b))))
+  (let ([lop (find-all-holes b)])
+    (find-hole-with-best-heuristic b lop)))
+
+; board -> listof(pos)
+(define (find-all-holes b)
+  (define (find-all-holes-accs b res idx)
+    (cond [(empty? b) res]
+	  [else
+	    (if (zero? (first b))
+		(find-all-holes-accs (rest b) (cons idx res) (add1 idx))
+		(find-all-holes-accs (rest b) res (add1 idx)))]))
+  (find-all-holes-accs b '() 0))
+
+; board listof(pos) -> pos
+(define (find-hole-with-best-heuristic b lop)
+  (define (best-heuristic-pos lop cur-best-pos cur-best-heuristic)
+    (cond [(empty? lop) cur-best-pos]
+	  [else
+	    (let* ([positions (flatten (get-valid-blocks (first lop)))]		; listof(pos)
+		   [lov (map (lambda(pos)					; listof(val)
+			       (list-ref b pos))
+			     positions)]
+		   [heuristic (length (filter					; how many values are already in this row, col, square?
+					(lambda(v) (not (zero? v)))
+					lov))])
+	      (if (> heuristic cur-best-heuristic)
+		  (best-heuristic-pos (rest lop) (first lop) heuristic)
+		  (best-heuristic-pos (rest lop) cur-best-pos cur-best-heuristic)))]))
+  (best-heuristic-pos lop -1 -1))
 
 ; board pos -> listof(board)
 (define (new-boards b p)
@@ -229,4 +254,4 @@
   (filter (lambda(lop) (member p lop))
 	  blocks))
 
-; (solve-sudoku b1)
+(solve-sudoku b10)
