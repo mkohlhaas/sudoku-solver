@@ -21,3 +21,12 @@ $ raco pkg install https://github.com/mkohlhaas/sudoku-solver.git
 $ git clone https://github.com/mkohlhaas/sudoku-solver.git
 $ raco test main.rkt
 ```
+# Compile
+```
+$ raco exe -o sudoku main.rkt
+```
+# Use Binary
+```
+$ parallel sudoku :::: private/sudoku17.txt
+```
+

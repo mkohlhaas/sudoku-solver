@@ -278,3 +278,11 @@
 		    (check-not-false (solve-sudoku b10))
 		    (check-not-false (solve-sudoku b11))))
 
+(module+ main
+
+	 (require racket/cmdline)
+	 (command-line
+	   #:program "sudoku"
+	   #:args (board)
+	   (let ([b (map string->number (drop-right (rest (string-split board "")) 1))])
+		 (solve-sudoku b))))
